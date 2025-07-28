@@ -268,7 +268,7 @@
         let shuffledQuestions = [];
         let currentQuestionIndex = 0;
         let score = 0;
-        // Biến mới để kiểm soát việc tính điểm: true nếu câu hỏi hiện tại có thể được tính điểm
+        // Biến để kiểm soát việc tính điểm: true nếu câu hỏi hiện tại có thể được tính điểm
         let canScoreThisQuestion = true; 
 
         // Lấy các phần tử DOM
@@ -359,12 +359,22 @@
 
                 scoreDisplay.textContent = `Điểm: ${score}`;
 
-                // Đọc đáp án đúng bằng giọng nói
+                // Đọc đáp án đúng và lời khen
                 if (synth.speaking) {
                     synth.cancel();
                 }
                 utterance.text = correctAnswer;
                 synth.speak(utterance);
+
+                const positiveFeedback = ["Good job!", "Well done!", "Great!"];
+                const randomPositivePhrase = positiveFeedback[Math.floor(Math.random() * positiveFeedback.length)];
+                const feedbackUtterance = new SpeechSynthesisUtterance(randomPositivePhrase);
+                feedbackUtterance.lang = 'en-US';
+                // Đọc lời khen sau khi đọc đáp án
+                utterance.onend = () => {
+                    synth.speak(feedbackUtterance);
+                };
+
 
                 triggerConfetti(buttonElement);
                 setTimeout(() => {
@@ -378,6 +388,14 @@
                 feedbackMessage.classList.remove('hidden');
                 // Nếu chọn sai, câu hỏi này sẽ không được tính điểm nữa (nếu chưa được tính)
                 canScoreThisQuestion = false; 
+
+                // Đọc "Try again"
+                if (synth.speaking) {
+                    synth.cancel();
+                }
+                utterance.text = 'Try again';
+                synth.speak(utterance);
+
                 setTimeout(() => {
                     buttonElement.classList.remove('wrong');
                     feedbackMessage.classList.add('hidden');
